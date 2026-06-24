@@ -1,0 +1,4 @@
+Flask
+Werkzeug
+SQLAlchemy
+Flask-SQLAlchemy

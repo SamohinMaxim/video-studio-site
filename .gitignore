@@ -1,0 +1,44 @@
+# Виртуальное окружение (твои библиотеки)
+.venv/
+env/
+venv/
+ENV/
+
+# База данных (она меняется постоянно, не нужна в репозитории)
+orders.db
+*.sqlite
+
+# Переменные окружения (ПАРОЛИ И ТОКЕНЫ!)
+.env
+
+# Файлы IDE (PyCharm)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Системные файлы macOS / Windows
+.DS_Store
+Thumbs.db
+
+# Питон кэш
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg

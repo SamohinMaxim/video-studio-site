@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админка: Заказы видеомонтажа</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body { background-color: #f1f3f5; }
+        .navbar { background-color: #4f46e5; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        /* Цвета бейджей статусов */
+        .status-badge.new { background-color: #e0e7ff; color: #4f46e5; }
+        .status-badge.in_progress { background-color: #fef3c7; color: #d97706; }
+        .status-badge.done { background-color: #d1fae5; color: #059669; }
+
+        table { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        th { background-color: #f8fafc; }
+
+        /* Стили кнопок связи */
+        .contact-btn {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            text-decoration: none;
+            border-radius: 6px;
+            color: white;
+            transition: transform 0.2s, opacity 0.3s;
+            display: inline-block;
+        }
+        .contact-btn:hover { transform: translateY(-2px); }
+
+        .btn-call { background-color: #198754; }       /* Зеленый - телефон */
+        .btn-vk { background-color: #0077FF; }        /* Синий - VK */
+        .btn-email { background-color: #6c757d; }      /* Серый - почта */
+
+        /* Стиль для неактивных кнопок (если нет данных) */
+        .btn-disabled {
+            background-color: #dee2e6 !important;
+            color: #adb5bd !important;
+            cursor: not-allowed;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* Обрезка длинного текста описания */
+        .text-truncate-custom {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Навигация -->
+    <nav class="navbar navbar-dark py-3">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/">← Вернуться на сайт</a>
+            <span class="text-white small">Панель администратора</span>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Уведомления (Flash messages) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <h2 class="mb-4 text-dark">Список заказов</h2>
+        <p class="text-muted">Используйте кнопки в колонке "Связь", чтобы быстро связаться с клиентом.</p>
+
+        {% if orders %}
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Клиент</th>
+                    <th>Задача</th>
+                    <th>Ссылка на видео</th>
+                    <th>Статус</th>
+                    <th>Дата</th>
+                    <th>Связь с клиентом</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td><strong>#{{ order.id }}</strong></td>
+
+                    <td>
+                        <div><strong>{{ order.name }}</strong></div>
+                        <small class="text-muted">{{ order.email }}</small>
+                    </td>
+
+                    <td class="text-truncate-custom">
+                        {{ order.description[:120] }}{% if order.description|length > 120 %}...{% endif %}
+                    </td>
+
+                    <td>
+                        {% if order.video_link %}
+                            <a href="{{ order.video_link }}" target="_blank" class="text-decoration-none small text-primary">
+                                Открыть ���
+                            </a>
+                        {% else %}
+                            <span class="text-muted small">Нет ссылки</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <span class="badge status-badge {{ order.status }} p-2">
+                            {{ order.status|replace('_', ' ') }}
+                        </span>
+                    </td>
+
+                    <td>{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+
+                    <!-- КОЛОНКА СВЯЗИ -->
+                    <td class="text-nowrap">
+                        <!-- 1. Звонок (tel:) -->
+                        {% if order.phone %}
+                            <!-- Очищаем номер от лишних символов для ссылки, но показываем как есть -->
+                            {% set clean_phone = order.phone|replace(' ', '')|replace('-', '')|replace('(', '')|replace(')', '') %}
+                            <a href="tel:{{ clean_phone }}" class="contact-btn btn-call" title="Позвонить клиенту">
+                                📞 Позвонить
+                            </a>
+                        {% else %}
+                            <span class="contact-btn btn-disabled" title="Телефон не указан">
+                                📞 Нет тел.
+                            </span>
+                        {% endif %}
+
+                        <!-- 2. VK (vk.com) -->
+                        {% if order.vk_profile %}
+                            <!-- Проверяем, есть ли http в ссылке, если нет - добавляем vk.com/ -->
+                            {% if 'vk.com' in order.vk_profile %}
+                                <a href="{{ order.vk_profile }}" target="_blank" class="contact-btn btn-vk" title="Написать в VK">
+                                    💬 VK
+                                </a>
+                            {% else %}
+                                <a href="https://vk.com/{{ order.vk_profile|replace('vk.com/', '')|replace('@', '')}}" target="_blank" class="contact-btn btn-vk" title="Написать в VK">
+                                    💬 VK
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <span class="contact-btn btn-disabled" title="Профиль VK не указан">
+                                💬 Нет VK
+                            </span>
+                        {% endif %}
+
+                        <!-- 3. Email (mailto:) -->
+                        <a href="mailto:{{ order.email }}" class="contact-btn btn-email" title="Отправить письмо">
+                            ✉ Email
+                        </a>
+                    </td>
+                    <!-- КОНЕЦ КОЛОНКИ СВЯЗИ -->
+
+                    <!-- Смена статуса -->
+                    <td>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                            <!-- Передаем токен дальше, чтобы не потерять доступ при редиректе -->
+                            <input type="hidden" name="token" value="{{ request.args.get('token', '') }}">
+
+                            <select name="status" class="form-select form-select-sm d-inline" onchange="this.form.submit()">
+                                <option value="new" {% if order.status =='new' %}selected{% endif %}>Новый</option>
+                                <option value="in_progress" {% if order.status =='in_progress' %}selected{% endif %}>В работе</option>
+                                <option value="done" {% if order.status =='done' %}selected{% endif %}>Готово</option>
+                            </select>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div class="alert alert-info text-center">
+                Пока нет заказов. Заполните форму на главной странице!
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

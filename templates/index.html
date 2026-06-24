@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Студия видеомонтажа | Заказ услуги</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 60px 0; border-radius: 12px;
+            margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .card { border: none; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); border-radius: 12px; }
+        .form-control:focus { border-color: #764ba2; box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25); }
+        .btn-primary { background-color: #764ba2; border-color: #764ba2; padding: 12px 30px; font-weight: 600; letter-spacing: 0.5px; }
+        .hint-text { font-size: 0.85rem; color: #6c757d; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="hero-section text-center">
+            <h1 class="display-4 fw-bold">Профессиональный видеомонтаж</h1>
+            <p class="lead">Загрузите материал в облако и оставьте контакты для связи.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card p-4">
+                    <form method="POST">
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-bold text-secondary">Ваше имя</label>
+                            <input type="text" class="form-control" id="name" name="name" required placeholder="Иван Иванов" value="{{ request.form.name or '' }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-bold text-secondary">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required placeholder="ivan@example.com" value="{{ request.form.email or '' }}">
+                            <div class="hint-text">Нужен для официального подтверждения заказа.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label fw-bold text-secondary">Телефон</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="+7 (999) 000-00-00" value="{{ request.form.phone or '' }}">
+                            <div class="hint-text">Если хотите, чтобы мы позвонили сразу, а не писали на почту.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="vk_profile" class="form-label fw-bold text-secondary">Ваш профиль ВКонтакте</label>
+                            <input type="url" class="form-control" id="vk_profile" name="vk_profile" placeholder="https://vk.com/id12345 или vk.com/durov" value="{{ request.form.vk_profile or '' }}">
+                            <div class="hint-text">Самый быстрый способ связи в текущих условиях. Менеджер напишет вам там.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="video_link" class="form-label fw-bold text-secondary">Ссылка на видео</label>
+                            <input type="url" class="form-control" id="video_link" name="video_link" required placeholder="https://drive.google.com/file/d/..." value="{{ request.form.video_link or '' }}">
+                            <div class="hint-text">Скопируйте публичную ссылку на файл с Google/Яндекс Диска.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-bold text-secondary">Описание задачи</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required placeholder="Например: нужно склеить 3 ролика, добавить титры...">{{ request.form.description or '' }}</textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">Отправить заказ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
